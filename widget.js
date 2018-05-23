@@ -4,13 +4,13 @@
 
   if(typeof window.frappe === "undefined"){
     var frappeLibrary = loadFrappe();
-    document.getElementByTagName("head")[0].appendChild(frappeLibrary);
+    document.getElementsByTagName("head")[0].appendChild(frappeLibrary);
     main();
   }
   else{
     main();
   }
-  
+
   // use frappe charts 1.1.0
 
   function loadFrappe(){
