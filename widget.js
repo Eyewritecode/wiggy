@@ -1,38 +1,41 @@
 (function(){
 
-  // Add frappe charts if not loaded
+  // load frappe charts
 
-  if(typeof window.frappe === "undefined"){
-    var frappeLibrary = loadFrappe();
-    document.getElementsByTagName("head")[0].appendChild(frappeLibrary);
+  var frappeJS = document.createElement("script");
+  frappeJS.type = "text/javascript";
+  frappeJS.src = "https://cdn.jsdelivr.net/npm/frappe-charts@1.1.0/dist/frappe-charts.min.iife.js";
+  document.getElementsByTagName("body")[0].appendChild(frappeJS);
+  frappeJS.onload = function(){
     main();
-  }
-  else{
-    main();
-  }
-
-  // use frappe charts 1.1.0
-
-  function loadFrappe(){
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "https://cdn.jsdelivr.net/npm/frappe-charts@1.1.0/dist/frappe-charts.min.iife.js";
-    return script;
   }
 
   function main(){
-    createWidgetContainer();
+    createWidgetContainer(plotData);
   }
 
   function createWidgetContainer(callback){
     var widgetContainer = document.getElementById("widget");
-    var widgetDiv = document.createElement("div");
-    widgetDiv.setAttribute("id", "chart"); // Refactor this to allow setting attributes separately
-    widgetContainer.appendChild(widgetDiv);
-    plotData(callback);
+    var chartDiv = document.createElement("div");
+    chartDiv.setAttribute("id", "chart"); // Refactor this to allow setting attributes separately
+    widgetContainer.appendChild(chartDiv);
+    callback();
   }
 
-  function plotData(callback){
+  function getReports() {
+    var ajax = new XMLHttpRequest();
+    ajax.open("GET", "https://admin.mycityreport.jp/projects/chiba.json", true);
+    ajax.send();
+    ajax.onreadystatechange=function(){
+      if(ajax.readyState == 4 && ajax.status == 200){
+        var response = JSON.parse(ajax.responseText);
+        console.log(response.project);
+        document.getElementById("chart").innerHTML = response.project.name;
+      }
+    };
+  }
+
+  function plotData(){
     const data = {
       labels: ["12am-3am", "3am-6pm", "6am-9am", "9am-12am",
           "12pm-3pm", "3pm-6pm", "6pm-9pm", "9am-12am"
@@ -47,16 +50,13 @@
               values: [25, 50, -10, 15, 18, 32, 27, 14]
           }
       ]
-  }
-
-  const chart = new frappe.Chart("#chart", {  // or a DOM element,
-                                              // new Chart() in case of ES6 module with above usage
-      title: "My Awesome Chart",
-      data: data,
-      type: 'axis-mixed', // or 'bar', 'line', 'scatter', 'pie', 'percentage'
-      height: 250,
-      colors: ['#7cd6fd', '#743ee2']
-  })
-    callback();
+    }
+    const chart = new frappe.Chart("#chart", { 
+        title: "My Awesome Chart",
+        data: data,
+        type: 'pie', // or 'bar', 'line', 'scatter', 'pie', 'percentage'
+        height: 250,
+        colors: ['#7cd6fd', '#743ee2']
+    });
   }
 })();
